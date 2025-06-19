@@ -1,5 +1,9 @@
 let myStore = new Store(1, "abc");
+let remeberLogin;
+let currentLogin, currentRole;
+navToLoginPage();
 getFromLocalStore();
+
 
 function navToHomePage() {
     document.getElementById("home").innerHTML = `
@@ -7,25 +11,98 @@ function navToHomePage() {
     <table border="1">
             <tr>
                 <th>ID</th>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th colspan="2">Action</th>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th colspan="2">Tương tác</th>
             </tr>
             <tbody id="product"></tbody>
         </table>`;
     getAllProducts();
 }
+function loginToHomePage() {
+    let users = myStore.getUsers();
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    for (let i = 0; i < users.length; i++) {
+        if (username == users[i].username && password == users[i].password) {
+            currentLogin = users[i];
+            currentRole = users[i].role;
+            alert("Đăng nhập thành công");
+            if (users[i].role == "ADMIN") {
+                document.getElementById("my-info").innerHTML = `
+                <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
+                <button onclick="navToProfile()">Profile</button>
+                <button onclick="logout()">Đăng xuất</button>
+                <button onclick="">QL.Users</button>
+                `;
+                document.getElementById("login").innerHTML = `
+                <h1>Quản Lý Sản Phẩm</h1>
+                <button onclick="navToHomePage()">Trang chủ</button>
+                <button>Yêu cầu</button>
+                <button onclick="navToAddPage()">Thêm</button>
+                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <div id="home"></div>
+                `;
+            }
+            else {
+                document.getElementById("my-info").innerHTML = `
+                <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
+                <button onclick="navToProfile()">Profile</button>
+                <button onclick="logout()">Đăng xuất</button>
+                `;
+                document.getElementById("login").innerHTML = `
+                <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
+                <button onclick="navToHomePage()">Trang chủ</button>
+                <button>Giỏ hàng</button>
+                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <div id="home"></div>
+                `;
+            }
+            return;
+        }
+    }
+    alert("Tài khoản hoặc mật khẩu không chính xác");
+}
+function navToRegisterPage() {
+    document.getElementById("login").innerHTML = `
+        <h1>Đăng ký tài khoản</h1>
+        <p>Tài khoản: <input type="text" id="username"></p>
+        <p>Mật khẩu: <input type="password" id="password"></p>
+        <p>Email: <input type="email" id="email"></p>
+        <p>Xác nhận mật khẩu: <input type="password" id="confirm-password"></p>
+        <button onclick="addUsers()">Đăng ký</button>
+        <p>Đã có tài khoản ? <a href="#" onclick="navToLoginPage()">Đăng nhập ngay</a></p>    
+    `;
+}
+function navToForgetPasswordPage() {
+    document.getElementById("login").innerHTML = `
+        <h1>Khôi phục mật khẩu</h1>
+        <p><input type="text" id="username" placeholder="Tài khoản"></p>
+        <p><input type="email" id="email" placeholder="Email đã đăng ký"></p>
+        <p><input type="password" id="password" placeholder="Mật khẩu mới"></p>
+        <p><input type="password" id="confirm-password" placeholder="Nhập lại mật khẩu mới"></p>
+        <button onclick="restoreUsersPassword()">Xác nhận</button>  
+    `;
+}
 function navToAddPage() {
     document.getElementById("home").innerHTML = `
         <h3>Thêm Sản Phẩm</h3>
-        <input type="text" placeholder="Name" id="nameP">
+        <input type="text" placeholder="Tên" id="nameP">
         <br>
         <br>
-        <input type="number" placeholder="Price" id="price">
+        <input type="number" placeholder="Giá" id="price">
         <br>
         <br>
-        <input type="number" placeholder="Quantity" id="quantity">
+        <input type="number" placeholder="Số lượng" id="quantity">
+        <br>
+        <br>
+        <input type="text" placeholder="Ảnh sản phẩm" id="image">
+        <br>
+        <br>
+        <input type="text" placeholder="Mô tả" id="description">
         <br>
         <br>
         <button onClick="addProducts()">Lưu</button>
@@ -34,13 +111,19 @@ function navToAddPage() {
 function navToEditPage(index) {
     document.getElementById("home").innerHTML = `
         <h3>Sửa Sản Phẩm</h3>
-        <input type="text" placeholder="Name" id="nameP" value="${myStore.listProduct[index].name}">
+        <input type="text" placeholder="Tên" id="nameP" value="${myStore.listProduct[index].name}">
         <br>
         <br>
-        <input type="number" placeholder="Price" id="price" value=${myStore.listProduct[index].price}>
+        <input type="number" placeholder="Giá" id="price" value="${myStore.listProduct[index].price}">
         <br>
         <br>
-        <input type="number" placeholder="Quantity" id="quantity" value=${myStore.listProduct[index].quantity}>
+        <input type="number" placeholder="Số lượng" id="quantity" value="${myStore.listProduct[index].quantity}">
+        <br>
+        <br>
+        <input type="text" placeholder="Ảnh sản phẩm" id="image" value="${myStore.listProduct[index].image}">
+        <br>
+        <br>
+        <input type="text" placeholder="Mô tả" id="description" value="${myStore.listProduct[index].description}">
         <br>
         <br>
         <button onClick="editProducts(${index})">Lưu</button>
@@ -105,9 +188,38 @@ function navToSearchMethod() {
             break;
     }
 }
+function navToLoginPage() {
+    document.getElementById("login").innerHTML = `
+        <h1>Chào mừng đến với Shoppe</h1>
+        <p>Tài khoản: <input type="text" id="username"></p>
+        <p>Mật khẩu: <input type="password" id="password"></p>
+        <button id="savelogin" onclick="rememberMe()">Lưu đăng nhập</button>
+        <button onclick="loginToHomePage()">Đăng nhập</button>
+        <br>
+        <p>Bạn chưa có tài khoản ? <a href="#" onclick="navToRegisterPage()">Đăng ký ngay</a>. Hoặc <a href="#" onclick="navToForgetPasswordPage()">Quên mật khẩu ?</a></p>
+    `
+}
+function navToProfile() {
+    document.getElementById("home").innerHTML = `
+        <h3>Profile của ${currentLogin.username}</h4>
+        <img src="${currentLogin.image}" alt="Avatar" width="225" height="182">
+        <br>
+        <input type="password" id="password" placeholder="Password" value="${currentLogin.password}">
+        <br>
+        <br>
+        <input type="email" id="email" placeholder="Email" value="${currentLogin.email}">
+        <br>
+        <br>
+        <input type="text" id="image" placeholder="Avatar" value="${currentLogin.image}">
+        <br>
+        <br>
+        <button onclick="saveprofile()">Lưu</button>
+    `;
+}
 function searchByName() {
+    updateFromLocal();
     let input = document.getElementById("ten").value.toLowerCase();
-    if (input == ""){
+    if (input == "") {
         document.getElementById("searchResult").innerHTML = "";
         return;
     }
@@ -115,118 +227,185 @@ function searchByName() {
         <h3>Danh Sách Sản Phẩm</h3>
         <table border="1">
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th colspan="2">Hành động</th>
             </tr>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].name.toLowerCase();
         if (data.includes(input)) {
-            html += `
+            if (currentRole == "ADMIN") {
+                html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
                 </tr>
             `;
+            }
+            else {
+                html += `
+                <tr>
+                    <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
+                    <td>${myStore.listProduct[i].price}</td>
+                    <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="">Thêm vào giỏ</button></td>
+                </tr>
+            `;
+            }
         }
     }
     html += "</table>";
     document.getElementById("searchResult").innerHTML = html;
 }
 function searchByPrice() {
+    updateFromLocal();
     let inputBegin = +document.getElementById("begin").value;
     let inputEnd = +document.getElementById("end").value;
     let html = `
         <h3>Danh Sách Sản Phẩm</h3>
         <table border="1">
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th colspan="2">Hành động</th>
             </tr>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].price;
-        if ((inputBegin <= 0 && inputEnd >= 0) && data == "Miễn phí") {
-            html += `
+        if (((inputBegin <= 0 && inputEnd >= 0) && data == "Miễn phí") || (data >= inputBegin && data <= inputEnd)) {
+            if (currentRole == "ADMIN") {
+                html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
                 </tr>
             `;
-        }
-        if (data >= inputBegin && data <= inputEnd) {
-            html += `
+            }
+            else {
+                html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="">Thêm vào giỏ</button></td>
                 </tr>
             `;
+            }
         }
     }
     html += "</table>";
     document.getElementById("searchResult").innerHTML = html;
 }
 function searchByQuantity() {
+    updateFromLocal();
     let inputBegin = +document.getElementById("begin").value;
     let inputEnd = +document.getElementById("end").value;
     let html = `
         <h3>Danh Sách Sản Phẩm</h3>
         <table border="1">
             <tr>
-                <th>Name</th>
-                <th>Price</th>
-                <th>Quantity</th>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Mô tả</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th colspan="2">Hành động</th>
             </tr>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].quantity;
-        if ((inputBegin <= 0 && inputEnd >= 0) && data == "Hết hàng") {
-            html += `
+        if (((inputBegin <= 0 && inputEnd >= 0) && data == "Hết hàng") || (data >= inputBegin && data <= inputEnd)) {
+            if (currentRole == "ADMIN") {
+                html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
                 </tr>
             `;
-        }
-        if (data >= inputBegin && data <= inputEnd) {
-            html += `
+            }
+            else {
+                html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
+                    <td><img src="${myStore.listProduct[i].image}" alt="${myStore.listProduct[i].name}" width="60" height="50"></td>
+                    <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
+                    <td><button onclick="">Thêm vào giỏ</button></td>
                 </tr>
             `;
+            }
         }
     }
     html += "</table>";
     document.getElementById("searchResult").innerHTML = html;
 }
 function getAllProducts() {
+    updateFromLocal();
     let list = myStore.displayProducts();
     let html = "";
     for (let i = 0; i < list.length; i++) {
-        html += `
+        if (currentRole == "ADMIN") {
+            html += `
                 <tr>
                     <td>${i + 1}</td>
                     <td>${list[i].name}</td>
+                    <td><img src="${list[i].image}" alt="${list[i].name}" width="60" height="50"></td>
+                    <td>${list[i].description}</td>
                     <td>${list[i].price}</td>
                     <td>${list[i].quantity}</td>
                     <td><button onclick="navToEditPage(${i})">Sửa</button></td>
                     <td><button onclick="removeProducts(${i})">Xoá</button></td>
                 </tr>
                 `;
+        }
+        else {
+            html += `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td>${list[i].name}</td>
+                    <td><img src="${list[i].image}" alt="${list[i].name}" width="60" height="50"></td>
+                    <td>${list[i].description}</td>
+                    <td>${list[i].price}</td>
+                    <td>${list[i].quantity}</td>
+                    <td><button onclick="">Thêm vào giỏ</button></td>
+                </tr>
+                `;
+        }
     }
     document.getElementById("product").innerHTML = html;
 }
 function addProducts() {
     let id = myStore.listProduct.length;
     let name = document.getElementById("nameP").value;
+    let image = document.getElementById("image").value;
+    let description = document.getElementById("description").value != "" ? document.getElementById("description").value : "Chưa có";
     let price = document.getElementById("price").value > 0 ? document.getElementById("price").value : "Miễn phí";
     let quantity = document.getElementById("quantity").value > 0 ? document.getElementById("quantity").value : "Hết hàng";
     if (checkNullOfProducts(name)) {
@@ -234,37 +413,138 @@ function addProducts() {
         return;
     }
     if (!checkExitOfProducts(name)) {
-        myStore.addProducts(id, name, price, quantity);
+        myStore.addProducts(id, name, price, quantity, image, description);
         saveInToLocalStore();
         navToHomePage();
     }
     else
         alert("Sản phẩm đã tồn tại");
 }
+function addUsers() {
+    let users = myStore.getUsers();
+    let username = document.getElementById("username").value;
+    let password = document.getElementById("password").value;
+    let re_password = document.getElementById("confirm-password").value;
+    let email = document.getElementById("email").value;
+    if (username == "" || password == "" || email == "") {
+        alert("Vui lòng điền đầy đủ các trường");
+        return;
+    }
+    if (re_password != password) {
+        alert("Mật khẩu xác nhận không khớp với mật khẩu");
+        return;
+    }
+    else if (password.length < 6) {
+        alert("Mật khẩu phải có từ 6 ký tự trở lên");
+        return;
+    }
+    for (let i = 0; i < users.length; i++) {
+        if (username == users[i].username) {
+            alert("Tài khoản đã tồn tại");
+            return;
+        }
+        else if (email == users[i].email) {
+            alert("Email đã tồn tại");
+            return;
+        }
+    }
+    myStore.addUsers(username, password, email);
+    alert("Đăng ký tài khoản thành công !");
+    saveInToLocalStore();
+    navToLoginPage();
+}
 function removeProducts(index) {
     if (confirm("Bạn có muốn xoá " + myStore.listProduct[index].name)) {
+        alert("Đã xoá " + myStore.listProduct[index].name + " khỏi cửa hàng");
         myStore.deleteProducts(index);
         saveInToLocalStore();
-        getAllProducts();
+        navToHomePage();
     }
 }
 function editProducts(index) {
     let name = document.getElementById("nameP").value;
+    let image = document.getElementById("image").value;
+    let description = document.getElementById("description").value != undefined ? document.getElementById("description").value : "Chưa có";
     let price = document.getElementById("price").value > 0 ? document.getElementById("price").value : "Miễn phí";
     let quantity = document.getElementById("quantity").value > 0 ? document.getElementById("quantity").value : "Hết hàng";
     if (checkNullOfProducts(name)) {
         alert("Vui lòng điền đầy đủ thông tin sản phẩm");
         return;
     }
-    myStore.modifiProducts(name, price, quantity, index);
+    myStore.modifiProducts(name, price, quantity, image, description, index);
     saveInToLocalStore();
     navToHomePage();
 }
+function restoreUsersPassword() {
+    let users = myStore.getUsers();
+    let username = document.getElementById("username").value;
+    let email = document.getElementById("email").value;
+    let password = document.getElementById("password").value;
+    let re_password = document.getElementById("confirm-password").value;
+    for (let i = 0; i < users.length; i++) {
+        if ((username == users[i].username && email == users[i].email) && (password.length >= 6 && re_password == password)) {
+            alert("Khôi phục mật khẩu thành công");
+            myStore.listUser[i].password = password;
+            saveInToLocalStore();
+            navToLoginPage();
+            return;
+        }
+    }
+    alert("Khôi phục thất bại");
+    navToLoginPage();
+}
 function saveInToLocalStore() {
     let data = JSON.stringify(myStore.listProduct);
+    let users_data = JSON.stringify(myStore.listUser);
     localStorage.setItem("MyShopee", data);
+    localStorage.setItem("UserStore", users_data);
+}
+function rememberMe() {
+    remeberLogin = !remeberLogin;
+    localStorage.setItem("RememberLogin", remeberLogin);
+    if (remeberLogin) {
+        localStorage.setItem("Username", document.getElementById("username").value);
+        localStorage.setItem("Password", document.getElementById("password").value);
+        alert("Đã lưu thông tin đăng nhập");
+    }
+    else {
+        localStorage.removeItem("Username");
+        localStorage.removeItem("Password");
+        alert("Đã huỷ lưu thông tin đăng nhập");
+    }
 }
 function getFromLocalStore() {
+    let data = localStorage.getItem("MyShopee");
+    let users_data = localStorage.getItem("UserStore");
+    let loginData = localStorage.getItem("RememberLogin");
+    if (data) {
+        myStore.listProduct = JSON.parse(data);
+    }
+    else {
+        myStore.listProduct = [];
+        saveInToLocalStore();
+    }
+    if (users_data) {
+        myStore.listUser = JSON.parse(users_data);
+    }
+    else {
+        let admin = new User("BanhUTC", "1234utc", "abc@gmail.com", "ADMIN");
+        myStore.listUser.push(admin);
+        saveInToLocalStore();
+    }
+    if (loginData) {
+        remeberLogin = loginData;
+        if (remeberLogin) {
+            document.getElementById("username").value = localStorage.getItem("Username");
+            document.getElementById("password").value = localStorage.getItem("Password");
+        }
+    }
+    else {
+        remeberLogin = false;
+        localStorage.setItem("RememberLogin", remeberLogin);
+    }
+}
+function updateFromLocal() {
     let data = localStorage.getItem("MyShopee");
     if (data) {
         myStore.listProduct = JSON.parse(data);
@@ -272,6 +552,73 @@ function getFromLocalStore() {
     else {
         myStore.listProduct = [];
         saveInToLocalStore();
+    }
+}
+function saveprofile() {
+    currentLogin.password = document.getElementById("password").value;
+    currentLogin.email = document.getElementById("email").value;
+    currentLogin.image = document.getElementById("image").value;
+    for (let i = 0; i < myStore.listUser.length; i++) {
+        if (currentLogin.username == myStore.listUser[i].username) {
+            myStore.listUser[i].password = currentLogin.password;
+            myStore.listUser[i].email = currentLogin.email;
+            myStore.listUser[i].image = currentLogin.image;
+            saveInToLocalStore();
+        }
+    }
+    alert("Cập nhật thông tin thành công");
+    if (currentLogin.role == "ADMIN") {
+        document.getElementById("my-info").innerHTML = `
+                <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
+                <button onclick="navToProfile()">Profile</button>
+                <button onclick="logout()">Đăng xuất</button>
+                <button onclick="">QL.Users</button>
+                `;
+        document.getElementById("login").innerHTML = `
+                <h1>Quản Lý Sản Phẩm</h1>
+                <button onclick="navToHomePage()">Trang chủ</button>
+                <button>Yêu cầu</button>
+                <button onclick="navToAddPage()">Thêm</button>
+                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <div id="home"></div>
+                `;
+    }
+    else {
+        document.getElementById("my-info").innerHTML = `
+                <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
+                <button onclick="navToProfile()">Profile</button>
+                <button onclick="logout()">Đăng xuất</button>
+                `;
+        document.getElementById("login").innerHTML = `
+                <h1>Mua sắm tiện ích</h1>
+                <button onclick="navToHomePage()">Trang chủ</button>
+                <button>Giỏ hàng</button>
+                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <div id="home"></div>
+                `;
+    }
+}
+function usersManage() {
+    let html = `
+        <h3>Danh Sách Người Dùng</h3>
+        <table border="1">
+            <tr>
+                <th>Id</th>
+                <th>Username</th>
+                <th>Avatar</th>
+                <th>Trạng thái</th>
+                <th colspan="2">Action</th>
+            </tr>
+        `;
+    for (let i = 0; i < myStore.listUser.length; i++) {
+
+    }
+}
+function logout() {
+    if (confirm("Bạn có chắc chắn muốn đăng xuất ?")) {
+        navToLoginPage();
+        document.getElementById("my-info").innerHTML = "";
+        getFromLocalStore();
     }
 }
 function checkExitOfProducts(name) {
