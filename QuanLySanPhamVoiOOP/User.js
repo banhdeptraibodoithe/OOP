@@ -4,11 +4,15 @@ class User {
     role;
     email;
     image;
+    statusOnline;
+    statusAccount;
 
     constructor(username, password, email, role) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.role = role;
+        this.statusAccount = false;
+        this.statusOnline = "Offline";
     }
 }
