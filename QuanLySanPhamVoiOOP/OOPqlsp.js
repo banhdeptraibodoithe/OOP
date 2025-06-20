@@ -29,7 +29,7 @@ function loginToHomePage() {
     for (let i = 0; i < users.length; i++) {
         if (username == users[i].username && password == users[i].password) {
             currentLogin = users[i];
-            users[i].statusOnline = "Online";
+            myStore.listUser[i].statusOnline = "Online";
             alert("Đăng nhập thành công");
             if (users[i].role == "ADMIN") {
                 document.getElementById("my-info").innerHTML = `
@@ -217,7 +217,7 @@ function navToProfile() {
         <button onclick="saveprofile()">Lưu</button>
     `;
 }
-function searchByName() {
+function searchByName() {   
     updateFromLocal();
     let input = document.getElementById("ten").value.toLowerCase();
     if (input == "") {
@@ -549,8 +549,8 @@ function updateFromLocal() {
     }
 }
 function saveprofile() {
-    currentLogin.password = document.getElementById("password").value;
-    currentLogin.email = document.getElementById("email").value;
+    currentLogin.password = document.getElementById("password").value != "" ? document.getElementById("password").value : currentLogin.password;
+    currentLogin.email = document.getElementById("email").value != "" ? document.getElementById("email").value : currentLogin.email;
     currentLogin.image = document.getElementById("image").value;
     for (let i = 0; i < myStore.listUser.length; i++) {
         if (currentLogin.username == myStore.listUser[i].username) {
@@ -622,6 +622,7 @@ function usersManage() {
     document.getElementById("home").innerHTML = html;
 }
 function logout(index) {
+    updateFromLocal();
     if (confirm("Bạn có chắc chắn muốn đăng xuất ?")) {
         myStore.listUser[index].statusOnline = "Offline";
         saveInToLocalStore();

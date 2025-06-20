@@ -12,7 +12,8 @@ class User {
         this.password = password;
         this.email = email;
         this.role = role;
-        this.statusAccount = false;
+        this.statusAccount = true;
         this.statusOnline = "Offline";
+        this.image = "";
     }
 }
