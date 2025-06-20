@@ -1,6 +1,6 @@
 let myStore = new Store(1, "abc");
 let remeberLogin;
-let currentLogin, currentRole;
+let currentLogin;
 navToLoginPage();
 getFromLocalStore();
 
@@ -29,14 +29,14 @@ function loginToHomePage() {
     for (let i = 0; i < users.length; i++) {
         if (username == users[i].username && password == users[i].password) {
             currentLogin = users[i];
-            currentRole = users[i].role;
+            users[i].statusOnline = "Online";
             alert("Đăng nhập thành công");
             if (users[i].role == "ADMIN") {
                 document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout()">Đăng xuất</button>
-                <button onclick="">QL.Users</button>
+                <button onclick="logout(${i})">Đăng xuất</button>
+                <button onclick="usersManage()">QL.Users</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
@@ -51,7 +51,7 @@ function loginToHomePage() {
                 document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout()">Đăng xuất</button>
+                <button onclick="logout(${i})">Đăng xuất</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
@@ -61,6 +61,7 @@ function loginToHomePage() {
                 <div id="home"></div>
                 `;
             }
+            saveInToLocalStore();
             return;
         }
     }
@@ -238,7 +239,7 @@ function searchByName() {
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].name.toLowerCase();
         if (data.includes(input)) {
-            if (currentRole == "ADMIN") {
+            if (currentLogin.role == "ADMIN") {
                 html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
@@ -287,7 +288,7 @@ function searchByPrice() {
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].price;
         if (((inputBegin <= 0 && inputEnd >= 0) && data == "Miễn phí") || (data >= inputBegin && data <= inputEnd)) {
-            if (currentRole == "ADMIN") {
+            if (currentLogin.role == "ADMIN") {
                 html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
@@ -336,7 +337,7 @@ function searchByQuantity() {
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].quantity;
         if (((inputBegin <= 0 && inputEnd >= 0) && data == "Hết hàng") || (data >= inputBegin && data <= inputEnd)) {
-            if (currentRole == "ADMIN") {
+            if (currentLogin.role == "ADMIN") {
                 html += `
                 <tr>
                     <td>${myStore.listProduct[i].name}</td>
@@ -371,7 +372,7 @@ function getAllProducts() {
     let list = myStore.displayProducts();
     let html = "";
     for (let i = 0; i < list.length; i++) {
-        if (currentRole == "ADMIN") {
+        if (currentLogin.role == "ADMIN") {
             html += `
                 <tr>
                     <td>${i + 1}</td>
@@ -514,24 +515,8 @@ function rememberMe() {
     }
 }
 function getFromLocalStore() {
-    let data = localStorage.getItem("MyShopee");
-    let users_data = localStorage.getItem("UserStore");
     let loginData = localStorage.getItem("RememberLogin");
-    if (data) {
-        myStore.listProduct = JSON.parse(data);
-    }
-    else {
-        myStore.listProduct = [];
-        saveInToLocalStore();
-    }
-    if (users_data) {
-        myStore.listUser = JSON.parse(users_data);
-    }
-    else {
-        let admin = new User("BanhUTC", "1234utc", "abc@gmail.com", "ADMIN");
-        myStore.listUser.push(admin);
-        saveInToLocalStore();
-    }
+    updateFromLocal();
     if (loginData) {
         remeberLogin = loginData;
         if (remeberLogin) {
@@ -546,11 +531,20 @@ function getFromLocalStore() {
 }
 function updateFromLocal() {
     let data = localStorage.getItem("MyShopee");
+    let users_data = localStorage.getItem("UserStore");
     if (data) {
         myStore.listProduct = JSON.parse(data);
     }
     else {
         myStore.listProduct = [];
+        saveInToLocalStore();
+    }
+    if (users_data) {
+        myStore.listUser = JSON.parse(users_data);
+    }
+    else {
+        let admin = new User("BanhUTC", "1234utc", "abc@gmail.com", "ADMIN");
+        myStore.listUser.push(admin);
         saveInToLocalStore();
     }
 }
@@ -572,7 +566,7 @@ function saveprofile() {
                 <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()">Profile</button>
                 <button onclick="logout()">Đăng xuất</button>
-                <button onclick="">QL.Users</button>
+                <button onclick="usersManage()">QL.Users</button>
                 `;
         document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
@@ -599,6 +593,8 @@ function saveprofile() {
     }
 }
 function usersManage() {
+    updateFromLocal();
+    let users = myStore.getUsers();
     let html = `
         <h3>Danh Sách Người Dùng</h3>
         <table border="1">
@@ -610,12 +606,25 @@ function usersManage() {
                 <th colspan="2">Action</th>
             </tr>
         `;
-    for (let i = 0; i < myStore.listUser.length; i++) {
-
+    for (let i = 1; i < myStore.listUser.length; i++) {
+        html += `
+            <tr>
+                <td>${i}</td>
+                <td>${users[i].username}</td>
+                <td><img src="${users[i].image}" alt="${users[i].username}" width="60" height="50"></td>
+                <td>${users[i].statusOnline}</td>
+                <td><button id="banusers onclick="">Khoá</button></td>
+                <td><button onclick="">Xoá</button></td>
+            </tr>
+        `;
     }
+    html += "</table>";
+    document.getElementById("home").innerHTML = html;
 }
-function logout() {
+function logout(index) {
     if (confirm("Bạn có chắc chắn muốn đăng xuất ?")) {
+        myStore.listUser[index].statusOnline = "Offline";
+        saveInToLocalStore();
         navToLoginPage();
         document.getElementById("my-info").innerHTML = "";
         getFromLocalStore();
