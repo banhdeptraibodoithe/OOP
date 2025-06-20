@@ -29,9 +29,6 @@ class Store{
     deleteUsers(index) {
         this.listUser.splice(index, 1);
     }
-    deleteUsers() {
-        this.listUser.pop();
-    }
     modifiProducts(name, price, quantity, image, description, index) {
         this.listProduct[index].name = name;
         this.listProduct[index].image = image;

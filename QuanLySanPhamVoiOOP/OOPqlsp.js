@@ -23,11 +23,16 @@ function navToHomePage() {
     getAllProducts();
 }
 function loginToHomePage() {
+    updateFromLocal();
     let users = myStore.getUsers();
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
     for (let i = 0; i < users.length; i++) {
         if (username == users[i].username && password == users[i].password) {
+            if (!users[i].statusAccount) {
+                alert("Tài khoản đã tạm khoá, liên hệ với ADMIN để được tư vấn");
+                return;
+            }
             currentLogin = users[i];
             myStore.listUser[i].statusOnline = "Online";
             alert("Đăng nhập thành công");
@@ -422,6 +427,7 @@ function addProducts() {
         alert("Sản phẩm đã tồn tại");
 }
 function addUsers() {
+    updateFromLocal();
     let users = myStore.getUsers();
     let username = document.getElementById("username").value;
     let password = document.getElementById("password").value;
@@ -460,6 +466,13 @@ function removeProducts(index) {
         myStore.deleteProducts(index);
         saveInToLocalStore();
         navToHomePage();
+    }
+}
+function removeUsers(index) {
+    if(confirm("Bạn có muốn xoá " + myStore.listUser[index].username)) {
+        myStore.deleteUsers(index);
+        saveInToLocalStore();
+        usersManage();
     }
 }
 function editProducts(index) {
@@ -606,20 +619,47 @@ function usersManage() {
                 <th colspan="2">Action</th>
             </tr>
         `;
-    for (let i = 1; i < myStore.listUser.length; i++) {
+    for (let i = 1; i < users.length; i++) {
         html += `
             <tr>
                 <td>${i}</td>
                 <td>${users[i].username}</td>
                 <td><img src="${users[i].image}" alt="${users[i].username}" width="60" height="50"></td>
                 <td>${users[i].statusOnline}</td>
-                <td><button id="banusers onclick="">Khoá</button></td>
-                <td><button onclick="">Xoá</button></td>
+            `;
+        if (users[i].statusAccount) {
+            html += `
+                <td><button onclick="lockAndUnlockAccount(${i})">Khoá</button></td>
+                <td><button onclick="removeUsers(${i})">Xoá</button></td>
             </tr>
-        `;
+            `;
+        }
+        else {
+            html += `
+                <td><button onclick="lockAndUnlockAccount(${i})">Mở khoá</button></td>
+                <td><button onclick="removeUsers(${i})">Xoá</button></td>
+            </tr>
+            `;
+        }
     }
     html += "</table>";
     document.getElementById("home").innerHTML = html;
+}
+function lockAndUnlockAccount(index) {
+    if (myStore.listUser[index].statusAccount) {
+        if (confirm("Bạn có chắc chắn muốn khoá " + myStore.listUser[index].username)) {
+            myStore.listUser[index].statusAccount = false;
+            saveInToLocalStore();
+            usersManage();
+        }
+    }
+    else {
+        if (confirm("Bạn có muốn mở khoá " + myStore.listUser[index].username)) {
+            myStore.listUser[index].statusAccount = true;
+            saveInToLocalStore();
+            usersManage();
+        }
+    }
 }
 function logout(index) {
     updateFromLocal();
