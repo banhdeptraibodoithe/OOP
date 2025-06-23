@@ -35,7 +35,6 @@ function loginToHomePage() {
             }
             currentLogin = users[i];
             myStore.listUser[i].statusOnline = "Online";
-            myStore.listUser[i].myCart = [];
             alert("Đăng nhập thành công");
             if (users[i].role == "ADMIN") {
                 document.getElementById("my-info").innerHTML = `
@@ -58,7 +57,7 @@ function loginToHomePage() {
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()">Profile</button>
                 <button onclick="logout(${i})">Đăng xuất</button>
-                <button onclick="">LS.Mua sắm</button>
+                <button onclick="navToHistoryCheckOut(${i})">LS.Mua sắm</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
@@ -264,8 +263,72 @@ function navToUsersCart() {
     `;
     document.getElementById("home").innerHTML = html;
 }
-function navToHistoryCheckOut() {
-    
+function navToHistoryCheckOut(index) {
+    updateFromLocal();
+    if (myStore.listUser[index].myCart.length == 0) {
+        document.getElementById("home").innerHTML = "<h3>Bạn chưa thực hiện giao dịch mua bán nào</h3>";
+        return;
+    }
+    let html = `
+        <h3>Lịch sử thanh toán</h3>
+        <table border="1">
+            <tr>
+                <th>Đơn hàng số</th>
+                <th>Thời gian thanh toán</th>
+                <th>Người thực hiện</th>
+                <th>Tổng đơn</th>
+                <th>Trạng thái</th>
+                <th colspan="2">Hành động</th>
+            </tr>
+        `;
+    for (let i = 0; i < myStore.listUser[index].myCart.length; i++) {
+        let data = myStore.listUser[index].myCart[i];
+        html += `
+            <tr>
+                <th>${i + 1}</th>
+                <th>${data.orderDate}</th>
+                <th>${data.billName}</th>
+                <th>${data.totalPrice}</th>
+                <th>${data.statusPayment}</th>
+                <td><button onclick="cancelBill(${index}, ${i})">Huỷ đơn</button></td>
+                <td><button onclick="navToViewDetail(${index}, ${i})">Xem chi tiết</button></td>
+            </tr>
+        `;
+    }
+    document.getElementById("home").innerHTML = html;
+}
+function navToViewDetail(indexUser, indexBill) {
+    let data = myStore.listUser[indexUser].myCart[indexBill];
+    let totalBill = 0;
+    let html = `
+        <h3>Chi tiết đơn hàng</h3>
+        <table border="1">
+            <tr>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+            </tr>
+        `;
+    for (let i = 0; i < data.listProductAdded.length; i++) {
+        html += `
+            <tr>
+                <th>${data.listProductAdded[i].name}</th>
+                <td><img src="${data.listProductAdded[i].image}" alt="${data.listProductAdded[i].name}" width="60" height="50"></td>
+                <th>${data.listProductAdded[i].price}</th>
+                <th>${data.listProductAdded[i].quantity}</th>
+                <th>${data.listProductAdded[i].price * data.listProductAdded[i].quantity}</th>
+            </tr>
+        `;
+        totalBill += data.listProductAdded[i].price * data.listProductAdded[i].quantity;
+    }
+    html += `
+        </table>
+        <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
+        <button onclick="navToHistoryCheckOut(${indexUser})">Quay lại</button>
+    `;
+    document.getElementById("home").innerHTML = html;
 }
 function searchByName() {
     updateFromLocal();
@@ -753,6 +816,33 @@ function cancelProducts(index) {
     saveInToLocalStore();
     navToUsersCart();
 }
+function cancelBill(indexUser, indexBill) {
+    let data = myStore.listUser[indexUser].myCart[indexBill];
+    if (data.statusPayment != "Chờ xử lý") {
+        alert("Chỉ có những đơn ở trạng thái chờ xử lý mới có thể huỷ, quý khách liên hệ với ADMIN để được tư vấn");
+        return;
+    }
+    if (confirm("Bạn có chắc muốn huỷ đơn này ?")) {
+        for (let i = 0; i < myStore.listProduct.length; i++) {
+            for (let j = 0; j < data.listProductAdded.length; j++) {
+                if (data.listProductAdded[j].name == myStore.listProduct[i].name) {
+                    if (myStore.listProduct[i].quantity == "Hết hàng")
+                        myStore.listProduct[i].quantity = data.listProductAdded[j].quantity;
+                    else
+                        myStore.listProduct[i].quantity += data.listProductAdded[j].quantity;
+                    data.listProductAdded.splice(j, 1);
+                    break;
+                }
+            }
+            if (data.listProductAdded.length == 0) 
+                break;
+        }
+        myStore.listUser[indexUser].myCart.splice(indexBill, 1);
+        saveInToLocalStore();
+        alert("Đơn hàng đã được huỷ bỏ thành công");
+        navToHistoryCheckOut(indexUser);
+    }
+}
 function minusProducts(index) {
     updateFromLocal();
     for (let i = 0; i < myStore.listProduct.length; i++) {
@@ -804,6 +894,10 @@ function checkOut(totalPrice) {
 }
 function logout(index) {
     updateFromLocal();
+    if (cartProducts.length > 0) {
+        alert("Vui lòng thanh toán sản phẩm trong giỏ hàng trước");
+        return;
+    }
     if (confirm("Bạn có chắc chắn muốn đăng xuất ?")) {
         myStore.listUser[index].statusOnline = "Offline";
         saveInToLocalStore();
