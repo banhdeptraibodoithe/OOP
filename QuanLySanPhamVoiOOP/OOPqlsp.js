@@ -1,6 +1,6 @@
 let myStore = new Store(1, "abc");
 let remeberLogin;
-let currentLogin;
+let currentLogin, cartProducts;
 navToLoginPage();
 getFromLocalStore();
 
@@ -35,6 +35,7 @@ function loginToHomePage() {
             }
             currentLogin = users[i];
             myStore.listUser[i].statusOnline = "Online";
+            myStore.listUser[i].myCart = [];
             alert("Đăng nhập thành công");
             if (users[i].role == "ADMIN") {
                 document.getElementById("my-info").innerHTML = `
@@ -46,7 +47,7 @@ function loginToHomePage() {
                 document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
                 <button onclick="navToHomePage()">Trang chủ</button>
-                <button>Yêu cầu</button>
+                <button onclick="">Yêu cầu</button>
                 <button onclick="navToAddPage()">Thêm</button>
                 <button onclick="navToSearchProducts()">Tìm kiếm</button>
                 <div id="home"></div>
@@ -57,11 +58,12 @@ function loginToHomePage() {
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()">Profile</button>
                 <button onclick="logout(${i})">Đăng xuất</button>
+                <button onclick="">LS.Mua sắm</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
                 <button onclick="navToHomePage()">Trang chủ</button>
-                <button>Giỏ hàng</button>
+                <button onclick="navToUsersCart()">Giỏ hàng</button>
                 <button onclick="navToSearchProducts()">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
@@ -222,7 +224,50 @@ function navToProfile() {
         <button onclick="saveprofile()">Lưu</button>
     `;
 }
-function searchByName() {   
+function navToUsersCart() {
+    if (cartProducts.length == 0) {
+        document.getElementById("home").innerHTML = "<h3>Bạn chưa thêm mặt hàng nào vào giỏ</h3>";
+        return;
+    }
+    let totalBill = 0;
+    let html = `
+        <h3>Giỏ hàng của tôi</h3>
+        <table border="1">
+            <tr>
+                <th>Tên</th>
+                <th>Ảnh</th>
+                <th>Giá</th>
+                <th>Số lượng</th>
+                <th>Thành tiền</th>
+                <th colspan="3">Hành động</th>
+            </tr>
+        `;
+    for (let i = 0; i < cartProducts.length; i++) {
+        html += `
+            <tr>
+                <td>${cartProducts[i].name}</td>
+                <td><img src="${cartProducts[i].image}" alt="${cartProducts[i].name}" width="60" height="50"></td>
+                <td>${cartProducts[i].price}</td>
+                <td>${cartProducts[i].quantity}</td>
+                <td>${cartProducts[i].quantity * cartProducts[i].price}</td>
+                <td><button onclick="plusProducts(${i})">Thêm</button></td>
+                <td><button onclick="minusProducts(${i})">Bớt</button></td>
+                <td><button onclick="cancelProducts(${i})">Loại bỏ</button></td>
+            </tr>
+        `;
+        totalBill += cartProducts[i].quantity * cartProducts[i].price;
+    }
+    html += `
+        </table>
+        <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
+        <button onclick="checkOut(${totalBill})">Thanh toán</button>
+    `;
+    document.getElementById("home").innerHTML = html;
+}
+function navToHistoryCheckOut() {
+    
+}
+function searchByName() {
     updateFromLocal();
     let input = document.getElementById("ten").value.toLowerCase();
     if (input == "") {
@@ -265,7 +310,7 @@ function searchByName() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
@@ -314,7 +359,7 @@ function searchByPrice() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
@@ -363,7 +408,7 @@ function searchByQuantity() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
@@ -400,7 +445,7 @@ function getAllProducts() {
                     <td>${list[i].description}</td>
                     <td>${list[i].price}</td>
                     <td>${list[i].quantity}</td>
-                    <td><button onclick="">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
                 </tr>
                 `;
         }
@@ -469,7 +514,7 @@ function removeProducts(index) {
     }
 }
 function removeUsers(index) {
-    if(confirm("Bạn có muốn xoá " + myStore.listUser[index].username)) {
+    if (confirm("Bạn có muốn xoá " + myStore.listUser[index].username)) {
         myStore.deleteUsers(index);
         saveInToLocalStore();
         usersManage();
@@ -510,8 +555,10 @@ function restoreUsersPassword() {
 function saveInToLocalStore() {
     let data = JSON.stringify(myStore.listProduct);
     let users_data = JSON.stringify(myStore.listUser);
+    let productOfCart = JSON.stringify(cartProducts);
     localStorage.setItem("MyShopee", data);
     localStorage.setItem("UserStore", users_data);
+    localStorage.setItem("CartProduct", productOfCart);
 }
 function rememberMe() {
     remeberLogin = !remeberLogin;
@@ -545,6 +592,7 @@ function getFromLocalStore() {
 function updateFromLocal() {
     let data = localStorage.getItem("MyShopee");
     let users_data = localStorage.getItem("UserStore");
+    let productOfCart = localStorage.getItem("CartProduct");
     if (data) {
         myStore.listProduct = JSON.parse(data);
     }
@@ -558,6 +606,13 @@ function updateFromLocal() {
     else {
         let admin = new User("BanhUTC", "1234utc", "abc@gmail.com", "ADMIN");
         myStore.listUser.push(admin);
+        saveInToLocalStore();
+    }
+    if (productOfCart) {
+        cartProducts = JSON.parse(productOfCart);
+    }
+    else {
+        cartProducts = [];
         saveInToLocalStore();
     }
 }
@@ -616,7 +671,7 @@ function usersManage() {
                 <th>Username</th>
                 <th>Avatar</th>
                 <th>Trạng thái</th>
-                <th colspan="2">Action</th>
+                <th colspan="2">Hành động</th>
             </tr>
         `;
     for (let i = 1; i < users.length; i++) {
@@ -660,6 +715,92 @@ function lockAndUnlockAccount(index) {
             usersManage();
         }
     }
+}
+function addToCart(index) {
+    updateFromLocal();
+    let product = myStore.listProduct[index];
+    if (product.quantity == "Hết hàng") {
+        alert(product.name + " đã hết hàng");
+        return;
+    }
+    for (let i = 0; i < cartProducts.length; i++) {
+        if (product.name == cartProducts[i].name) {
+            cartProducts[i].quantity++;
+            myStore.listProduct[index].quantity--;
+            if (myStore.listProduct[index].quantity == 0)
+                myStore.listProduct[index].quantity = "Hết hàng";
+            saveInToLocalStore();
+            navToHomePage();
+            return;
+        }
+    }
+    cartProducts.push(new ProductsOfCart(product.name, product.price == "Miễn phí" ? 0 : parseInt(product.price), 1, product.image, product.description));
+    myStore.listProduct[index].quantity--;
+    if (myStore.listProduct[index].quantity == 0)
+        myStore.listProduct[index].quantity = "Hết hàng";
+    saveInToLocalStore();
+    navToHomePage();
+}
+function cancelProducts(index) {
+    updateFromLocal();
+    for (let i = 0; i < myStore.listProduct.length; i++) {
+        if (myStore.listProduct[i].name == cartProducts[index].name) {
+            myStore.listProduct[i].quantity = myStore.listProduct[i].quantity == "Hết hàng" ? cartProducts[index].quantity : (myStore.listProduct[i].quantity + cartProducts[index].quantity);
+            break;
+        }
+    }
+    cartProducts.splice(index, 1);
+    saveInToLocalStore();
+    navToUsersCart();
+}
+function minusProducts(index) {
+    updateFromLocal();
+    for (let i = 0; i < myStore.listProduct.length; i++) {
+        if (myStore.listProduct[i].name == cartProducts[index].name) {
+            cartProducts[index].quantity--;
+            if (myStore.listProduct[i].quantity == "Hết hàng") 
+                myStore.listProduct[i].quantity = 1;
+            else
+                myStore.listProduct[i].quantity++;
+            if (cartProducts[index].quantity == 0) {
+                cartProducts.splice(index, 1);
+                break;
+            }
+        }
+    }
+    saveInToLocalStore();
+    navToUsersCart();
+}
+function plusProducts(index) {
+    updateFromLocal();
+    for (let i = 0; i < myStore.listProduct.length; i++) {
+        if (myStore.listProduct[i].name == cartProducts[index].name) {
+            if (myStore.listProduct[i].quantity == "Hết hàng") {
+                alert(myStore.listProduct[i].name + " đã hết hàng");
+                break;
+            }
+            myStore.listProduct[i].quantity--;
+            if (myStore.listProduct[i].quantity == 0)
+                myStore.listProduct[i].quantity = "Hết hàng";
+            cartProducts[index].quantity++;
+        }
+    }
+    saveInToLocalStore();
+    navToUsersCart();
+}
+function checkOut(totalPrice) {
+    updateFromLocal();
+    let date = new Date();
+    for (let i = 0; i < myStore.listUser.length; i++) {
+        if (currentLogin.username == myStore.listUser[i].username) {
+            myStore.listUser[i].myCart.push(new Cart(myStore.listUser[i].myCart.length + 1, date.toString(), currentLogin.username, totalPrice, cartProducts));
+            alert("Thanh toán hoàn tất, hệ thống đang xử lý đơn hàng của bạn");
+            cartProducts = [];
+            saveInToLocalStore();
+            break;
+        }
+    }
+    navToUsersCart();
 }
 function logout(index) {
     updateFromLocal();

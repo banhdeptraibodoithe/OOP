@@ -6,6 +6,7 @@ class User {
     image;
     statusOnline;
     statusAccount;
+    myCart;
 
     constructor(username, password, email, role) {
         this.username = username;
@@ -15,5 +16,6 @@ class User {
         this.statusAccount = true;
         this.statusOnline = "Offline";
         this.image = "";
+        this.myCart = [];
     }
 }
