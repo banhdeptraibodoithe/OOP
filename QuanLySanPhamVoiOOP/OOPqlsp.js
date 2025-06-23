@@ -1,6 +1,6 @@
 let myStore = new Store(1, "abc");
 let remeberLogin;
-let currentLogin, cartProducts;
+let currentLogin, cartProducts = [];
 navToLoginPage();
 getFromLocalStore();
 
@@ -46,7 +46,7 @@ function loginToHomePage() {
                 document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
                 <button onclick="navToHomePage()">Trang chủ</button>
-                <button onclick="">Yêu cầu</button>
+                <button onclick="navToRequests()">Yêu cầu</button>
                 <button onclick="navToAddPage()">Thêm</button>
                 <button onclick="navToSearchProducts()">Tìm kiếm</button>
                 <div id="home"></div>
@@ -285,7 +285,7 @@ function navToHistoryCheckOut(index) {
         let data = myStore.listUser[index].myCart[i];
         html += `
             <tr>
-                <th>${i + 1}</th>
+                <th>${data.orderNo}</th>
                 <th>${data.orderDate}</th>
                 <th>${data.billName}</th>
                 <th>${data.totalPrice}</th>
@@ -323,12 +323,104 @@ function navToViewDetail(indexUser, indexBill) {
         `;
         totalBill += data.listProductAdded[i].price * data.listProductAdded[i].quantity;
     }
-    html += `
+    if (currentLogin.role == "ADMIN") {
+        html += `
+        </table>
+        <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
+        <button onclick="navToRequests()">Quay lại</button>
+    `;
+    }
+    else {
+        html += `
         </table>
         <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
         <button onclick="navToHistoryCheckOut(${indexUser})">Quay lại</button>
     `;
+    }
     document.getElementById("home").innerHTML = html;
+}
+function navToRequests() {
+    updateFromLocal();
+    let html = `
+        <h3>Tất cả yêu cầu</h3>
+        <table border="1">
+            <tr>
+                <th>Đơn hàng số</th>
+                <th>Thời gian thanh toán</th>
+                <th>Người thực hiện</th>
+                <th>Tổng đơn</th>
+                <th>Trạng thái</th>
+                <th colspan="2">Hành động</th>
+            </tr>
+        `;
+    for (let i = 1; i < myStore.listUser.length; i++) {
+        for (let j = 0; j < myStore.listUser[i].myCart.length; j++) {
+            let data = myStore.listUser[i].myCart[j];
+            html += `
+            <tr>
+                <th>${data.orderNo}</th>
+                <th>${data.orderDate}</th>
+                <th>${data.billName}</th>
+                <th>${data.totalPrice}</th>
+                <th>${data.statusPayment}</th>
+        `;
+        if (data.statusPayment == "Chờ xử lý") {
+            html += `
+                <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Thành công">Chấp thuận</option>
+                <option value="Thất bại">Từ chối</option>
+                </select></td>
+            `;
+        }
+        else if (data.statusPayment == "Thành công") {
+            html += `
+                <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
+                <option value="Thành công">Chấp thuận</option>
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Thất bại">Từ chối</option>
+                </select></td>
+            `;
+        }
+        else if (data.statusPayment == "Thất bại") {
+            html += `
+                <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
+                <option value="Thất bại">Từ chối</option>
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Thành công">Chấp thuận</option>
+                </select></td>
+            `;
+        }
+        else {
+            html += `
+                <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
+                <option value="Đã huỷ">Đã bị huỷ</option>
+                <option value="Thành công">Chấp thuận</option>
+                <option value="Chờ xử lý">Chờ xử lý</option>
+                <option value="Thất bại">Từ chối</option>
+                </select></td>
+            `;
+        }
+            html += `
+                <td><button onclick="navToViewDetail(${i}, ${j})">Xem chi tiết</button></td>
+            </tr>
+            `;
+        }
+    }
+    html += "</table>";
+    document.getElementById("home").innerHTML = html;
+}
+function setRequest(indexUser, indexBill) {
+    let data = myStore.listUser[indexUser].myCart[indexBill];
+    if (data.statusPayment == "Đã huỷ") {
+        alert("Đơn hàng đã bị huỷ bởi người dùng, không thể cập nhật");
+        navToRequests();
+        return;
+    }
+    myStore.listUser[indexUser].myCart[indexBill].statusPayment = document.getElementById(`${data.orderDate}`).value;
+    alert("Cập nhật trạng thái thành công");
+    saveInToLocalStore();
+    navToRequests();
 }
 function searchByName() {
     updateFromLocal();
@@ -618,10 +710,8 @@ function restoreUsersPassword() {
 function saveInToLocalStore() {
     let data = JSON.stringify(myStore.listProduct);
     let users_data = JSON.stringify(myStore.listUser);
-    let productOfCart = JSON.stringify(cartProducts);
     localStorage.setItem("MyShopee", data);
     localStorage.setItem("UserStore", users_data);
-    localStorage.setItem("CartProduct", productOfCart);
 }
 function rememberMe() {
     remeberLogin = !remeberLogin;
@@ -655,7 +745,6 @@ function getFromLocalStore() {
 function updateFromLocal() {
     let data = localStorage.getItem("MyShopee");
     let users_data = localStorage.getItem("UserStore");
-    let productOfCart = localStorage.getItem("CartProduct");
     if (data) {
         myStore.listProduct = JSON.parse(data);
     }
@@ -669,13 +758,6 @@ function updateFromLocal() {
     else {
         let admin = new User("BanhUTC", "1234utc", "abc@gmail.com", "ADMIN");
         myStore.listUser.push(admin);
-        saveInToLocalStore();
-    }
-    if (productOfCart) {
-        cartProducts = JSON.parse(productOfCart);
-    }
-    else {
-        cartProducts = [];
         saveInToLocalStore();
     }
 }
@@ -830,14 +912,11 @@ function cancelBill(indexUser, indexBill) {
                         myStore.listProduct[i].quantity = data.listProductAdded[j].quantity;
                     else
                         myStore.listProduct[i].quantity += data.listProductAdded[j].quantity;
-                    data.listProductAdded.splice(j, 1);
                     break;
                 }
             }
-            if (data.listProductAdded.length == 0) 
-                break;
         }
-        myStore.listUser[indexUser].myCart.splice(indexBill, 1);
+        myStore.listUser[indexUser].myCart[indexBill].statusPayment = "Đã huỷ";
         saveInToLocalStore();
         alert("Đơn hàng đã được huỷ bỏ thành công");
         navToHistoryCheckOut(indexUser);
