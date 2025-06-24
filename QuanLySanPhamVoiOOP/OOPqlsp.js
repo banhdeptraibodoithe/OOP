@@ -7,19 +7,23 @@ getFromLocalStore();
 
 function navToHomePage() {
     document.getElementById("home").innerHTML = `
-    <h3>Danh Sách Sản Phẩm</h3>
-    <table border="1">
-            <tr>
-                <th>ID</th>
-                <th>Tên</th>
-                <th>Ảnh</th>
-                <th>Mô tả</th>
-                <th>Giá</th>
-                <th>Số lượng</th>
-                <th colspan="2">Tương tác</th>
-            </tr>
+    <div class="table-responsive">
+        <h3 class="text-center">Danh Sách Sản Phẩm</h3>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên</th>
+                    <th>Ảnh</th>
+                    <th>Mô tả</th>
+                    <th>Giá</th>
+                    <th>Số lượng</th>
+                    <th colspan="2">Tương tác</th>
+                </tr>
+            </thead>
             <tbody id="product"></tbody>
-        </table>`;
+        </table>
+    </div>`;
     getAllProducts();
 }
 function loginToHomePage() {
@@ -39,31 +43,31 @@ function loginToHomePage() {
             if (users[i].role == "ADMIN") {
                 document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
-                <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout(${i})">Đăng xuất</button>
-                <button onclick="usersManage()">QL.Users</button>
+                <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
+                <button onclick="logout(${i})" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="usersManage()" class="btn btn-primary">QL.Users</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
-                <button onclick="navToHomePage()">Trang chủ</button>
-                <button onclick="navToRequests()">Yêu cầu</button>
-                <button onclick="navToAddPage()">Thêm</button>
-                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
+                <button onclick="navToRequests()" class="btn btn-primary">Yêu cầu</button>
+                <button onclick="navToAddPage()" class="btn btn-primary">Thêm</button>
+                <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
             }
             else {
                 document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${username} <img src="${users[i].image}" alt="avatar" width="30" height="30"></h4>
-                <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout(${i})">Đăng xuất</button>
-                <button onclick="navToHistoryCheckOut(${i})">LS.Mua sắm</button>
+                <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
+                <button onclick="logout(${i})" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="navToHistoryCheckOut(${i})" class="btn btn-primary">LS.Mua sắm</button>
                 `;
                 document.getElementById("login").innerHTML = `
                 <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
-                <button onclick="navToHomePage()">Trang chủ</button>
-                <button onclick="navToUsersCart()">Giỏ hàng</button>
-                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
+                <button onclick="navToUsersCart()" class="btn btn-primary">Giỏ hàng</button>
+                <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
             }
@@ -80,7 +84,7 @@ function navToRegisterPage() {
         <p>Mật khẩu: <input type="password" id="password"></p>
         <p>Email: <input type="email" id="email"></p>
         <p>Xác nhận mật khẩu: <input type="password" id="confirm-password"></p>
-        <button onclick="addUsers()">Đăng ký</button>
+        <button onclick="addUsers()" class="btn btn-primary">Đăng ký</button>
         <p>Đã có tài khoản ? <a href="#" onclick="navToLoginPage()">Đăng nhập ngay</a></p>    
     `;
 }
@@ -91,7 +95,7 @@ function navToForgetPasswordPage() {
         <p><input type="email" id="email" placeholder="Email đã đăng ký"></p>
         <p><input type="password" id="password" placeholder="Mật khẩu mới"></p>
         <p><input type="password" id="confirm-password" placeholder="Nhập lại mật khẩu mới"></p>
-        <button onclick="restoreUsersPassword()">Xác nhận</button>  
+        <button onclick="restoreUsersPassword()" class="btn btn-primary">Xác nhận</button>  
     `;
 }
 function navToAddPage() {
@@ -112,7 +116,7 @@ function navToAddPage() {
         <input type="text" placeholder="Mô tả" id="description">
         <br>
         <br>
-        <button onClick="addProducts()">Lưu</button>
+        <button onClick="addProducts()" class="btn btn-primary">Lưu</button>
     `;
 }
 function navToEditPage(index) {
@@ -133,7 +137,7 @@ function navToEditPage(index) {
         <input type="text" placeholder="Mô tả" id="description" value="${myStore.listProduct[index].description}">
         <br>
         <br>
-        <button onClick="editProducts(${index})">Lưu</button>
+        <button onClick="editProducts(${index})" class="btn btn-primary">Lưu</button>
     `;
 }
 function navToSearchProducts() {
@@ -174,7 +178,7 @@ function navToSearchMethod() {
                 <option value="c">Theo lượng tồn kho</option>
             </select>
             <br>
-            <button onclick="searchByPrice()">Tìm kiếm !!!</button>
+            <button onclick="searchByPrice()" class="btn btn-primary">Tìm kiếm</button>
             <div id="searchResult"></div>
             `;
             break;
@@ -189,7 +193,7 @@ function navToSearchMethod() {
                 <option value="b">Theo mức giá</option>
             </select>
             <br>
-            <button onclick="searchByQuantity()">Tìm kiếm !!!</button>
+            <button onclick="searchByQuantity()" class="btn btn-primary">Tìm kiếm</button>
             <div id="searchResult"></div>
             `;
             break;
@@ -200,11 +204,23 @@ function navToLoginPage() {
         <h1>Chào mừng đến với Shoppe</h1>
         <p>Tài khoản: <input type="text" id="username"></p>
         <p>Mật khẩu: <input type="password" id="password"></p>
-        <button id="savelogin" onclick="rememberMe()">Lưu đăng nhập</button>
-        <button onclick="loginToHomePage()">Đăng nhập</button>
+        <div class="form-check">
+        <input type="checkbox" class="form-check-input" id="showPassword" >
+        <label class="form-check-label" for="showPassword">Hiển thị mật khẩu</label>
+        </div>
+        <button id="savelogin" onclick="rememberMe()" class="btn btn-primary">Lưu đăng nhập</button>
+        <button onclick="loginToHomePage()" class="btn btn-primary">Đăng nhập</button>
         <br>
         <p>Bạn chưa có tài khoản ? <a href="#" onclick="navToRegisterPage()">Đăng ký ngay</a>. Hoặc <a href="#" onclick="navToForgetPasswordPage()">Quên mật khẩu ?</a></p>
     `
+    document.getElementById('showPassword').addEventListener('change', function() {
+    const passwordInput = document.getElementById('password');
+    if (this.checked) {
+        passwordInput.type = 'text';
+    } else {
+        passwordInput.type = 'password';
+    }
+});
 }
 function navToProfile() {
     document.getElementById("home").innerHTML = `
@@ -220,7 +236,7 @@ function navToProfile() {
         <input type="text" id="image" placeholder="Avatar" value="${currentLogin.image}">
         <br>
         <br>
-        <button onclick="saveprofile()">Lưu</button>
+        <button onclick="saveprofile()" class="btn btn-primary">Lưu</button>
     `;
 }
 function navToUsersCart() {
@@ -230,8 +246,10 @@ function navToUsersCart() {
     }
     let totalBill = 0;
     let html = `
+    <div class="table-container text-center">
         <h3>Giỏ hàng của tôi</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Tên</th>
                 <th>Ảnh</th>
@@ -240,6 +258,8 @@ function navToUsersCart() {
                 <th>Thành tiền</th>
                 <th colspan="3">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 0; i < cartProducts.length; i++) {
         html += `
@@ -249,17 +269,19 @@ function navToUsersCart() {
                 <td>${cartProducts[i].price}</td>
                 <td>${cartProducts[i].quantity}</td>
                 <td>${cartProducts[i].quantity * cartProducts[i].price}</td>
-                <td><button onclick="plusProducts(${i})">Thêm</button></td>
-                <td><button onclick="minusProducts(${i})">Bớt</button></td>
-                <td><button onclick="cancelProducts(${i})">Loại bỏ</button></td>
+                <td><button onclick="plusProducts(${i})" class="btn btn-primary">Thêm</button></td>
+                <td><button onclick="minusProducts(${i})" class="btn btn-primary">Bớt</button></td>
+                <td><button onclick="cancelProducts(${i})" class="btn btn-primary">Loại bỏ</button></td>
             </tr>
         `;
         totalBill += cartProducts[i].quantity * cartProducts[i].price;
     }
     html += `
+        </tbody>
         </table>
         <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
-        <button onclick="checkOut(${totalBill})">Thanh toán</button>
+        <button onclick="checkOut(${totalBill})" class="btn btn-primary">Thanh toán</button>
+        </div>
     `;
     document.getElementById("home").innerHTML = html;
 }
@@ -270,8 +292,10 @@ function navToHistoryCheckOut(index) {
         return;
     }
     let html = `
+    <div class="table-container text-center">
         <h3>Lịch sử thanh toán</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Đơn hàng số</th>
                 <th>Thời gian thanh toán</th>
@@ -280,6 +304,8 @@ function navToHistoryCheckOut(index) {
                 <th>Trạng thái</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 0; i < myStore.listUser[index].myCart.length; i++) {
         let data = myStore.listUser[index].myCart[i];
@@ -290,26 +316,35 @@ function navToHistoryCheckOut(index) {
                 <th>${data.billName}</th>
                 <th>${data.totalPrice}</th>
                 <th>${data.statusPayment}</th>
-                <td><button onclick="cancelBill(${index}, ${i})">Huỷ đơn</button></td>
-                <td><button onclick="navToViewDetail(${index}, ${i})">Xem chi tiết</button></td>
+                <td><button onclick="cancelBill(${index}, ${i})" class="btn btn-primary">Huỷ đơn</button></td>
+                <td><button onclick="navToViewDetail(${index}, ${i})" class="btn btn-primary">Xem chi tiết</button></td>
             </tr>
         `;
     }
+    html += `
+        </tbody>
+        </table>
+        </div>
+    `;
     document.getElementById("home").innerHTML = html;
 }
 function navToViewDetail(indexUser, indexBill) {
     let data = myStore.listUser[indexUser].myCart[indexBill];
     let totalBill = 0;
     let html = `
+    <div class="table-container text-center">
         <h3>Chi tiết đơn hàng</h3>
-        <table border="1">
-            <tr>
-                <th>Tên</th>
-                <th>Ảnh</th>
-                <th>Giá</th>
-                <th>Số lượng</th>
-                <th>Thành tiền</th>
-            </tr>
+        <table class="table table-bordered table-striped mx-auto">
+            <thead>
+                    <tr>
+                        <th>Tên</th>
+                        <th>Ảnh</th>
+                        <th>Giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                    </tr>
+                </thead>
+                <tbody>
         `;
     for (let i = 0; i < data.listProductAdded.length; i++) {
         html += `
@@ -325,16 +360,20 @@ function navToViewDetail(indexUser, indexBill) {
     }
     if (currentLogin.role == "ADMIN") {
         html += `
+        </tbody>
         </table>
         <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
-        <button onclick="navToRequests()">Quay lại</button>
+        <button onclick="navToRequests()" class="btn btn-primary">Quay lại</button>
+        </div>
     `;
     }
     else {
         html += `
+        </tbody>
         </table>
         <h3>Tổng cộng hoá đơn: ${totalBill}</h3>
-        <button onclick="navToHistoryCheckOut(${indexUser})">Quay lại</button>
+        <button onclick="navToHistoryCheckOut(${indexUser})" class="btn btn-primary">Quay lại</button>
+        </div>
     `;
     }
     document.getElementById("home").innerHTML = html;
@@ -342,8 +381,10 @@ function navToViewDetail(indexUser, indexBill) {
 function navToRequests() {
     updateFromLocal();
     let html = `
+    <div class="table-container text-center">
         <h3>Tất cả yêu cầu</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Đơn hàng số</th>
                 <th>Thời gian thanh toán</th>
@@ -352,6 +393,8 @@ function navToRequests() {
                 <th>Trạng thái</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 1; i < myStore.listUser.length; i++) {
         for (let j = 0; j < myStore.listUser[i].myCart.length; j++) {
@@ -364,35 +407,35 @@ function navToRequests() {
                 <th>${data.totalPrice}</th>
                 <th>${data.statusPayment}</th>
         `;
-        if (data.statusPayment == "Chờ xử lý") {
-            html += `
+            if (data.statusPayment == "Chờ xử lý") {
+                html += `
                 <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
                 <option value="Chờ xử lý">Chờ xử lý</option>
                 <option value="Thành công">Chấp thuận</option>
                 <option value="Thất bại">Từ chối</option>
                 </select></td>
             `;
-        }
-        else if (data.statusPayment == "Thành công") {
-            html += `
+            }
+            else if (data.statusPayment == "Thành công") {
+                html += `
                 <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
                 <option value="Thành công">Chấp thuận</option>
                 <option value="Chờ xử lý">Chờ xử lý</option>
                 <option value="Thất bại">Từ chối</option>
                 </select></td>
             `;
-        }
-        else if (data.statusPayment == "Thất bại") {
-            html += `
+            }
+            else if (data.statusPayment == "Thất bại") {
+                html += `
                 <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
                 <option value="Thất bại">Từ chối</option>
                 <option value="Chờ xử lý">Chờ xử lý</option>
                 <option value="Thành công">Chấp thuận</option>
                 </select></td>
             `;
-        }
-        else {
-            html += `
+            }
+            else {
+                html += `
                 <td><select id="${data.orderDate}" onchange="setRequest(${i}, ${j})">
                 <option value="Đã huỷ">Đã bị huỷ</option>
                 <option value="Thành công">Chấp thuận</option>
@@ -400,14 +443,18 @@ function navToRequests() {
                 <option value="Thất bại">Từ chối</option>
                 </select></td>
             `;
-        }
+            }
             html += `
-                <td><button onclick="navToViewDetail(${i}, ${j})">Xem chi tiết</button></td>
+                <td><button onclick="navToViewDetail(${i}, ${j})" class="btn btn-primary">Xem chi tiết</button></td>
             </tr>
             `;
         }
     }
-    html += "</table>";
+    html += `
+        </tbody>
+        </table>
+        </div>
+    `;
     document.getElementById("home").innerHTML = html;
 }
 function setRequest(indexUser, indexBill) {
@@ -430,8 +477,10 @@ function searchByName() {
         return;
     }
     let html = `
+    <div class="table-container text-center">
         <h3>Danh Sách Sản Phẩm</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Tên</th>
                 <th>Ảnh</th>
@@ -440,6 +489,8 @@ function searchByName() {
                 <th>Số lượng</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].name.toLowerCase();
@@ -452,8 +503,8 @@ function searchByName() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
-                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
+                    <td><button onclick="navToEditPage(${i})" class="btn btn-primary">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})" class="btn btn-primary">Xoá</button></td>
                 </tr>
             `;
             }
@@ -465,13 +516,17 @@ function searchByName() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})" class="btn btn-primary">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
         }
     }
-    html += "</table>";
+    html += `
+    </tbody>
+    </table>
+    </div>
+    `;
     document.getElementById("searchResult").innerHTML = html;
 }
 function searchByPrice() {
@@ -479,8 +534,10 @@ function searchByPrice() {
     let inputBegin = +document.getElementById("begin").value;
     let inputEnd = +document.getElementById("end").value;
     let html = `
+    <div class="table-container text-center">
         <h3>Danh Sách Sản Phẩm</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Tên</th>
                 <th>Ảnh</th>
@@ -489,6 +546,8 @@ function searchByPrice() {
                 <th>Số lượng</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].price;
@@ -501,8 +560,8 @@ function searchByPrice() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
-                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
+                    <td><button onclick="navToEditPage(${i})" class="btn btn-primary">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})" class="btn btn-primary">Xoá</button></td>
                 </tr>
             `;
             }
@@ -514,13 +573,17 @@ function searchByPrice() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})" class="btn btn-primary">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
         }
     }
-    html += "</table>";
+    html += `
+    </tbody>
+    </table>
+    </div>
+    `;
     document.getElementById("searchResult").innerHTML = html;
 }
 function searchByQuantity() {
@@ -528,8 +591,10 @@ function searchByQuantity() {
     let inputBegin = +document.getElementById("begin").value;
     let inputEnd = +document.getElementById("end").value;
     let html = `
+        <div class="table-container text-center">
         <h3>Danh Sách Sản Phẩm</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Tên</th>
                 <th>Ảnh</th>
@@ -538,6 +603,8 @@ function searchByQuantity() {
                 <th>Số lượng</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 0; i < myStore.listProduct.length; i++) {
         let data = myStore.listProduct[i].quantity;
@@ -550,8 +617,8 @@ function searchByQuantity() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
-                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
+                    <td><button onclick="navToEditPage(${i})" class="btn btn-primary">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})" class="btn btn-primary">Xoá</button></td>
                 </tr>
             `;
             }
@@ -563,13 +630,17 @@ function searchByQuantity() {
                     <td>${myStore.listProduct[i].description}</td>
                     <td>${myStore.listProduct[i].price}</td>
                     <td>${myStore.listProduct[i].quantity}</td>
-                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})" class="btn btn-primary">Thêm vào giỏ</button></td>
                 </tr>
             `;
             }
         }
     }
-    html += "</table>";
+    html += `
+    </tbody>
+    </table>
+    </div>
+    `;
     document.getElementById("searchResult").innerHTML = html;
 }
 function getAllProducts() {
@@ -586,8 +657,8 @@ function getAllProducts() {
                     <td>${list[i].description}</td>
                     <td>${list[i].price}</td>
                     <td>${list[i].quantity}</td>
-                    <td><button onclick="navToEditPage(${i})">Sửa</button></td>
-                    <td><button onclick="removeProducts(${i})">Xoá</button></td>
+                    <td><button onclick="navToEditPage(${i})" class="btn btn-primary">Sửa</button></td>
+                    <td><button onclick="removeProducts(${i})" class="btn btn-primary">Xoá</button></td>
                 </tr>
                 `;
         }
@@ -600,7 +671,7 @@ function getAllProducts() {
                     <td>${list[i].description}</td>
                     <td>${list[i].price}</td>
                     <td>${list[i].quantity}</td>
-                    <td><button onclick="addToCart(${i})">Thêm vào giỏ</button></td>
+                    <td><button onclick="addToCart(${i})" class="btn btn-primary">Thêm vào giỏ</button></td>
                 </tr>
                 `;
         }
@@ -777,30 +848,30 @@ function saveprofile() {
     if (currentLogin.role == "ADMIN") {
         document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
-                <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout()">Đăng xuất</button>
-                <button onclick="usersManage()">QL.Users</button>
+                <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
+                <button onclick="logout()" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="usersManage()" class="btn btn-primary">QL.Users</button>
                 `;
         document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
-                <button onclick="navToHomePage()">Trang chủ</button>
-                <button>Yêu cầu</button>
-                <button onclick="navToAddPage()">Thêm</button>
-                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
+                <button onclick="navToRequests()" class="btn btn-primary">Yêu cầu</button>
+                <button onclick="navToAddPage()" class="btn btn-primary">Thêm</button>
+                <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
     }
     else {
         document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
-                <button onclick="navToProfile()">Profile</button>
-                <button onclick="logout()">Đăng xuất</button>
+                <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
+                <button onclick="logout()" class="btn btn-primary">Đăng xuất</button>
                 `;
         document.getElementById("login").innerHTML = `
                 <h1>Mua sắm tiện ích</h1>
-                <button onclick="navToHomePage()">Trang chủ</button>
-                <button>Giỏ hàng</button>
-                <button onclick="navToSearchProducts()">Tìm kiếm</button>
+                <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
+                <button onclick="navToUsersCart()" class="btn btn-primary">Giỏ hàng</button>
+                <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
     }
@@ -809,8 +880,10 @@ function usersManage() {
     updateFromLocal();
     let users = myStore.getUsers();
     let html = `
+    <div class="table-container text-center">
         <h3>Danh Sách Người Dùng</h3>
-        <table border="1">
+        <table class="table table-bordered table-striped mx-auto">
+        <thead>
             <tr>
                 <th>Id</th>
                 <th>Username</th>
@@ -818,6 +891,8 @@ function usersManage() {
                 <th>Trạng thái</th>
                 <th colspan="2">Hành động</th>
             </tr>
+        </thead>
+        <tbody>
         `;
     for (let i = 1; i < users.length; i++) {
         html += `
@@ -829,20 +904,24 @@ function usersManage() {
             `;
         if (users[i].statusAccount) {
             html += `
-                <td><button onclick="lockAndUnlockAccount(${i})">Khoá</button></td>
-                <td><button onclick="removeUsers(${i})">Xoá</button></td>
+                <td><button onclick="lockAndUnlockAccount(${i})" class="btn btn-primary">Khoá</button></td>
+                <td><button onclick="removeUsers(${i})" class="btn btn-primary">Xoá</button></td>
             </tr>
             `;
         }
         else {
             html += `
-                <td><button onclick="lockAndUnlockAccount(${i})">Mở khoá</button></td>
-                <td><button onclick="removeUsers(${i})">Xoá</button></td>
+                <td><button onclick="lockAndUnlockAccount(${i})" class="btn btn-primary">Mở khoá</button></td>
+                <td><button onclick="removeUsers(${i})" class="btn btn-primary">Xoá</button></td>
             </tr>
             `;
         }
     }
-    html += "</table>";
+    html += `
+    </tbody>
+    </table>
+    </div>
+    `;
     document.getElementById("home").innerHTML = html;
 }
 function lockAndUnlockAccount(index) {
@@ -927,7 +1006,7 @@ function minusProducts(index) {
     for (let i = 0; i < myStore.listProduct.length; i++) {
         if (myStore.listProduct[i].name == cartProducts[index].name) {
             cartProducts[index].quantity--;
-            if (myStore.listProduct[i].quantity == "Hết hàng") 
+            if (myStore.listProduct[i].quantity == "Hết hàng")
                 myStore.listProduct[i].quantity = 1;
             else
                 myStore.listProduct[i].quantity++;
