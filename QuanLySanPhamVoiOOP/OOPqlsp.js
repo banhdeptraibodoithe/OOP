@@ -80,10 +80,18 @@ function loginToHomePage() {
 function navToRegisterPage() {
     document.getElementById("login").innerHTML = `
         <h1>Đăng ký tài khoản</h1>
-        <p>Tài khoản: <input type="text" id="username"></p>
-        <p>Mật khẩu: <input type="password" id="password"></p>
-        <p>Email: <input type="email" id="email"></p>
-        <p>Xác nhận mật khẩu: <input type="password" id="confirm-password"></p>
+        <input type="text" id="username" placeholder="Tài khoản">
+        <br>
+        <br>
+        <input type="password" id="password" placeholder="Mật khẩu">
+        <br>
+        <br>
+        <input type="email" id="email" placeholder="Email">
+        <br>
+        <br>
+        <input type="password" id="confirm-password" placeholder="Xác nhận mật khẩu">
+        <br>
+        <br>
         <button onclick="addUsers()" class="btn btn-primary">Đăng ký</button>
         <p>Đã có tài khoản ? <a href="#" onclick="navToLoginPage()">Đăng nhập ngay</a></p>    
     `;
@@ -201,7 +209,7 @@ function navToSearchMethod() {
 }
 function navToLoginPage() {
     document.getElementById("login").innerHTML = `
-        <h1>Chào mừng đến với Shoppe</h1>
+        <h1>Shop Của Tôi</h1>
         <p>Tài khoản: <input type="text" id="username"></p>
         <p>Mật khẩu: <input type="password" id="password"></p>
         <div class="form-check">
@@ -226,6 +234,7 @@ function navToProfile() {
     document.getElementById("home").innerHTML = `
         <h3>Profile của ${currentLogin.username}</h4>
         <img src="${currentLogin.image}" alt="Avatar" width="225" height="182">
+        <br>
         <br>
         <input type="password" id="password" placeholder="Password" value="${currentLogin.password}">
         <br>
@@ -833,6 +842,7 @@ function updateFromLocal() {
     }
 }
 function saveprofile() {
+    let nums = 0;
     currentLogin.password = document.getElementById("password").value != "" ? document.getElementById("password").value : currentLogin.password;
     currentLogin.email = document.getElementById("email").value != "" ? document.getElementById("email").value : currentLogin.email;
     currentLogin.image = document.getElementById("image").value;
@@ -841,18 +851,21 @@ function saveprofile() {
             myStore.listUser[i].password = currentLogin.password;
             myStore.listUser[i].email = currentLogin.email;
             myStore.listUser[i].image = currentLogin.image;
+            myStore.listUser[i].statusOnline = "Online";
+            nums = i;
             saveInToLocalStore();
+            break;
         }
     }
     alert("Cập nhật thông tin thành công");
     if (currentLogin.role == "ADMIN") {
-        document.getElementById("my-info").innerHTML = `
+                document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
-                <button onclick="logout()" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="logout(${nums})" class="btn btn-primary">Đăng xuất</button>
                 <button onclick="usersManage()" class="btn btn-primary">QL.Users</button>
                 `;
-        document.getElementById("login").innerHTML = `
+                document.getElementById("login").innerHTML = `
                 <h1>Quản Lý Sản Phẩm</h1>
                 <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
                 <button onclick="navToRequests()" class="btn btn-primary">Yêu cầu</button>
@@ -860,21 +873,22 @@ function saveprofile() {
                 <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
-    }
-    else {
-        document.getElementById("my-info").innerHTML = `
+            }
+            else {
+                document.getElementById("my-info").innerHTML = `
                 <h4>xin chào ${currentLogin.username} <img src="${currentLogin.image}" alt="avatar" width="30" height="30"></h4>
                 <button onclick="navToProfile()" class="btn btn-primary">Profile</button>
-                <button onclick="logout()" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="logout(${nums})" class="btn btn-primary">Đăng xuất</button>
+                <button onclick="navToHistoryCheckOut(${nums})" class="btn btn-primary">LS.Mua sắm</button>
                 `;
-        document.getElementById("login").innerHTML = `
-                <h1>Mua sắm tiện ích</h1>
+                document.getElementById("login").innerHTML = `
+                <h1>Mua Sắm Thả Ga, Không Lo Về Giá</h1>
                 <button onclick="navToHomePage()" class="btn btn-primary">Trang chủ</button>
                 <button onclick="navToUsersCart()" class="btn btn-primary">Giỏ hàng</button>
                 <button onclick="navToSearchProducts()" class="btn btn-primary">Tìm kiếm</button>
                 <div id="home"></div>
                 `;
-    }
+            }
 }
 function usersManage() {
     updateFromLocal();

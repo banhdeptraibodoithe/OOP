@@ -13,5 +13,5 @@ class Cart {
         this.totalPrice = totalPrice;
         this.listProductAdded = listProductAdded;
         this.statusPayment = "Chờ xử lý";
-    }
+    }   
 }
